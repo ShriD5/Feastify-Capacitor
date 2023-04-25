@@ -19,8 +19,7 @@ First, build and sync project:
 ```ios
 npm run static
 npx cap sync android
-# or
-pnpm dev
+
 ```
 
 Then, open android studio or xcode:
@@ -29,18 +28,14 @@ Then, open android studio or xcode:
 npx cap open ios
 # android
 npx cap open android
-# or
-pnpm dev
 ```
 
 
-First, build and sync project:
+Or if the emulator is already open, :
 
 ```ios
-npm run static
-npx cap sync android
-# or
-pnpm dev
+npx cap run android || ios
+
 ```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
