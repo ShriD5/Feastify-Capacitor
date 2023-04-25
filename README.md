@@ -12,6 +12,36 @@ yarn dev
 pnpm dev
 ```
 
+## Getting Started With Android and IOS
+
+First, build and sync project:
+
+```ios
+npm run static
+npx cap sync android
+# or
+pnpm dev
+```
+
+Then, open android studio or xcode:
+
+```ios
+npx cap open ios
+# android
+npx cap open android
+# or
+pnpm dev
+```
+
+
+First, build and sync project:
+
+```ios
+npm run static
+npx cap sync android
+# or
+pnpm dev
+```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
