@@ -17,7 +17,7 @@ import {
     NumberInput,
     FormLabel, FormControl, NumberDecrementStepper
 } from "@chakra-ui/react";
-import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, setDoc } from "firebase/firestore";
 import Navbar from "@/components/Navbar";
 import {database} from "../../lib/firebase";
 import {AddIcon, CheckIcon, Icon} from "@chakra-ui/icons";
@@ -26,29 +26,42 @@ import BackButton from "@/components/IconButton";
 const FoodItems = () => {
     const toast = useToast();
     const [foodItems, setFoodItems] = useState([]);
-    const [requestSent, setRequestSent] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isLoading, setIsLoading] = useState(false);
+    const [quantity, setQuantity] = useState(1);
+    const [requestSent, setRequestSent] = useState(Array(foodItems.length).fill(false));
 
     useEffect(() => {
         const fetchFoodItems = async () => {
             const querySnapshot = await getDocs(collection(database, "food-items"));
             const fetchedFoodItems = [];
-            querySnapshot.forEach((doc) =>
-                fetchedFoodItems.push({ id: doc.id, ...doc.data() })
-            );
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                fetchedFoodItems.push({
+                    id: doc.id,
+                    ...data,
+                    requestedQuantity: data.requestedQuantity || 0, // add requestedQuantity field and default to 0 if it doesn't exist
+                });
+            });
             setFoodItems(fetchedFoodItems);
         };
         fetchFoodItems();
     }, []);
-    const handleRequestPickup = async (foodItemId) => {
-        await updateDoc(doc(database, "food-items", foodItemId), { status: "Requesting" });
+
+    const handleRequestPickup = async (foodItemId, requestedQuantity, index) => {
+        setIsLoading(true);
+        await updateDoc(doc(database, "food-items", foodItemId), {
+            status: "Requesting",
+            requestedQuantity: requestedQuantity,
+        });
         const querySnapshot = await getDocs(collection(database, "food-items"));
         const fetchedFoodItems = [];
         querySnapshot.forEach((doc) =>
             fetchedFoodItems.push({ id: doc.id, ...doc.data() })
         );
-        setRequestSent(true);
+        const updatedRequestSent = [...requestSent];
+        updatedRequestSent[index] = true;
+        setRequestSent(updatedRequestSent);
         setFoodItems(fetchedFoodItems);
         toast({
             title: "Pickup Request Sent",
@@ -56,7 +69,8 @@ const FoodItems = () => {
             duration: 3000,
             isClosable: true,
         });
-    }
+        setIsLoading(false);
+    };
 
     return (
         <Box w={"100%"}  bgImage="url(https://duolearn-public.s3.ap-south-1.amazonaws.com/pexels-julia-m-cameron-6994963.jpg)"
@@ -70,7 +84,7 @@ const FoodItems = () => {
                         <BackButton route="/Volunteer" />
                     </Box>
                     <SimpleGrid columns={{ sm: 1, md: 2, lg: 3 }} spacing={8}>
-                        {foodItems.map((foodItem) => (
+                        {foodItems.map((foodItem, index) => (
                             <Box
                                 key={foodItem.id}
                                 bg={"white"}
@@ -105,21 +119,28 @@ const FoodItems = () => {
                                         </FormControl>
                                         <Button
                                             colorScheme="blue"
-                                            disabled={isLoading && requestSent}
-                                            onClick={() => handleRequestPickup(foodItem.id)}
+                                            disabled={
+                                                isLoading ||
+                                                requestSent[index] ||
+                                                foodItem.requestedQuantity > 0
+                                            }
+                                            onClick={() =>
+                                                handleRequestPickup(foodItem.id, parseInt(quantity), index)
+                                            }
                                         >
                                             {isLoading ? (
                                                 <>
                                                     Sending request... <Spinner ml={2} size="sm" />
                                                 </>
-                                            ) : foodItem.status !== "Requesting" ? (
-                                                "Request Pickup"
-                                            ) : (
+                                            ) : requestSent[index] ? (
                                                 <>
                                                     Request Sent <CheckIcon ml={2} />
                                                 </>
+                                            ) : (
+                                                "Request Pickup"
                                             )}
                                         </Button>
+
                                     </Stack>
                                 </Box>
                             </Box>

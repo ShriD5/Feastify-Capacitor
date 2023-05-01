@@ -28,22 +28,6 @@ function MobileNavbar() {
     const userRole = useUserRole();
     console.log(userRole)
     const router = useRouter();
-    let links = [];
-
-    if (userRole === "donor") {
-        links = [
-            { to: "/AddFood", label: "Add Food" },
-            { to: "/DonorFeed", label: "Donor Feed" },
-        ];
-    } else if (userRole === "volunteer") {
-        links = [
-            { to: "/FoodItems", label: "Food Items" },
-            { to: "/AddLocation", label: "Add Location" },
-            { to: "/GiveFeedback", label: "Give Feedback" },
-        ];
-    } else if (userRole === "admin") {
-        links = [{ to: "/AdminMenu", label: "Admin Menu" }];
-    }
 
     const handleLogout = async () => {
         try {
@@ -75,11 +59,11 @@ function MobileNavbar() {
             >
                 <Text
                     color={"white"}
-                    fontSize={"3xl"}
+                    fontSize={"4xl"}
                     fontWeight={"extrabold"}
-                    fontFamily={"sans-serif"}
+                    fontFamily={"montserrat"}
                 >
-                    DonorPal
+                    Feastify
                 </Text>
                 <IconButton
                     size="md"
@@ -98,21 +82,6 @@ function MobileNavbar() {
 
                     <DrawerBody>
                         <VStack spacing={4} align="stretch">
-                            {links.map((link) => (
-                                <Link
-                                    key={link.to}
-                                    to={link.to}
-                                    onClick={() => setActiveTab(link.label)}
-                                >
-                                    <Text
-                                        fontWeight={
-                                            activeTab === link.label ? "bold" : "normal"
-                                        }
-                                    >
-                                        {link.label}
-                                    </Text>
-                                </Link>
-                            ))}
                             <Text
                                 cursor={"pointer"}
                                 fontWeight={"normal"}

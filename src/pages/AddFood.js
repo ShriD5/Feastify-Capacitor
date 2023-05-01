@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useCallback, useState} from "react";
 import {
     Box,
     Button,
@@ -6,9 +6,7 @@ import {
     FormControl,
     FormLabel,
     Input,
-    Stack,
     Textarea,
-    Link
 } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
 import { getFirestore, collection, addDoc , doc , updateDoc} from "firebase/firestore";
@@ -20,14 +18,15 @@ import BackButton from "@/components/IconButton";
 const AddFood = () =>  {
     const [foodItems, setFoodItems] = useState([]);
     const [loading, setLoading] = useState(false);
-const router = useRouter() ;
-    const handleFoodItemSubmit = async (foodItem) => {
+    const router = useRouter() ;
+
+    const handleFoodItemSubmit = useCallback(async (foodItem) => {
         try {
             setLoading(true); // Set loading to true
             const { name, image, amount, time, location, status } = foodItem;
 
             // Upload image to Firebase Storage
-            const storage = getStorage(app) ;
+            const storage = getStorage(app);
             const storageRef = ref(storage, `food-items/${image.name}`);
             const uploadTask = uploadBytes(storageRef, image);
             await uploadTask;
@@ -46,24 +45,13 @@ const router = useRouter() ;
                 status,
             });
             setFoodItems([...foodItems, foodItem]);
-             await router.push("/DonorFeed")
-            setLoading(false); // Set loading to false in case of error
+            await router.push("/DonorFeed");
 
+            setLoading(false); // Set loading to false in case of error
         } catch (error) {
             console.error(error);
         }
-    };
-
-    // const handlePickup = async (id) => {
-    //     const updatedFoodItems = [...foodItems];
-    //     const foodItemIndex = updatedFoodItems.findIndex((item) => item.id === id);
-    //     updatedFoodItems[foodItemIndex].status = "accepted";
-    //     setFoodItems(updatedFoodItems);
-    //
-    //     // Update the status of the food item in Firestore
-    //     const foodItemRef = doc(database, "food-items", id);
-    //     await updateDoc(foodItemRef, { status: "accepted" });
-    // };
+    }, [foodItems]);
 
     return (
         <Box w={"100%"}  bgImage="url(https://duolearn-public.s3.ap-south-1.amazonaws.com/pexels-julia-m-cameron-6994963.jpg)"

@@ -57,8 +57,28 @@ const router = useRouter() ;
         button.disabled = true;
         button.textContent = "Approved";
     };
+    const handleDeny = async (id) => {
+        const updatedFoodItems = [...foodItems];
+        const foodItemIndex = updatedFoodItems.findIndex((item) => item.id === id);
+        updatedFoodItems[foodItemIndex].status = "Denied";
+        setFoodItems(updatedFoodItems);
 
+        // Update the status of the food item in Firestore
+        const foodItemRef = doc(database, "food-items", id);
+        await updateDoc(foodItemRef, { status: "Denied" });
 
+        // Show a toast message to the user
+        toast({
+            title: "Pickup Request Denied",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+        });
+        // Disable the button after it is clicked
+        const button = document.getElementById(`button-${id}`);
+        button.disabled = true;
+        button.textContent = "Denied";
+    };
     return (
         <Box w={"100%"}  bgImage="url(https://duolearn-public.s3.ap-south-1.amazonaws.com/pexels-julia-m-cameron-6994963.jpg)"
              bgSize="cover"
@@ -94,13 +114,30 @@ const router = useRouter() ;
                                             <span style={{color:"blue"}}> Ready to eat until: </span> {foodItem.time} from now.
                                         </Text>
                                         <Text> <span style={{color:"blue"}}>Contact for pickup:</span> {foodItem.location}</Text>
-                                        { foodItem.status === "still waiting" ? null :  <Button   id={`button-${foodItem.id}`}
-                                                                                                  color="blue.500"
-                                                                                                  onClick={() => handlePickup(foodItem.id)}
-                                                                                                  disabled={foodItem.status === "Approved"}
-                                                                                                  cursor={foodItem.status === "Approved" ? "not-allowed" : "pointer"}
-                                        >{foodItem.status === "Approved" ? "Approved" : "Approve Pickup"}</Button> }
+                                        {foodItem.requestedQuantity ?   <Text> <span style={{color:"blue"}}>Requested Quantity:</span> {foodItem.requestedQuantity}</Text> : null }
 
+                                        {foodItem.status === "still waiting" ? null : (
+                                            <>
+                                                <Button
+                                                    id={`button-${foodItem.id}`}
+                                                    color="blue.500"
+                                                    onClick={() => handlePickup(foodItem.id)}
+                                                    disabled={foodItem.status === "Approved"}
+                                                    cursor={foodItem.status === "Approved" ? "not-allowed" : "pointer"}
+                                                >
+                                                    {foodItem.status === "Approved" ? "Approved" : "Approve Pickup"}
+                                                </Button>
+                                                <Button
+                                                    id={`button-${foodItem.id}-deny`}
+                                                    color="red.500"
+                                                    onClick={() => handleDeny(foodItem.id)}
+                                                    disabled={foodItem.status === "Denied"}
+                                                    cursor={foodItem.status === "Denied" ? "not-allowed" : "pointer"}
+                                                >
+                                                    {foodItem.status === "Denied" ? "Denied" : "Deny Pickup"}
+                                                </Button>
+                                            </>
+                                        )}
                                     </Stack>
                                 </Box>
                             </Box>
@@ -125,6 +162,7 @@ const router = useRouter() ;
             </Container>
         </Box>
     );
+
 };
 
 export default DonorFeed;

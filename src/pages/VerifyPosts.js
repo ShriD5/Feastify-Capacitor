@@ -15,6 +15,7 @@ import Navbar from "@/components/Navbar";
 import { database } from "../../lib/firebase";
 import { AddIcon, EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import {useRouter} from "next/router";
+import BackButton from "@/components/IconButton";
 
 const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -64,8 +65,10 @@ blur={'xl'}        >
             <Navbar />
             <Container maxW={"container.xl"} py={8}>
                 <Center>
+                    <Box d={{ base: "block", md: "none" }}>
+                        <BackButton route="/AdminHome" />
+                    </Box>
                     <SimpleGrid columns={{ sm: 1, md: 2, lg: 3 }} spacing={8}>
-                        <Heading fontSize={'5xl'} >Hello Admin !</Heading>
                         {foodItems.map((foodItem) => (
                             <Box
                                 key={foodItem.id}
